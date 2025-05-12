@@ -1,0 +1,53 @@
+version: '3.8'
+
+services:
+  mysql_bike:
+    container_name: mysql_bike
+    image: mysql:8.0
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: 1234
+      MYSQL_DATABASE: db_bike
+      MYSQL_PASSWORD: 1234
+      MYSQL_TCP_PORT: 3306
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+    networks:
+      - bike_network
+
+  db_bike:
+    container_name: db_bike_migrations
+    image: bike-dados
+    depends_on:
+      - mysql_bike
+    environment:
+      MYSQL_ROOT_PASSWORD: 1234
+      MYSQL_DATABASE: db_bike
+      MYSQL_USER: root
+      MYSQL_PASSWORD: 1234
+    networks:
+      - bike_network
+
+  server_bike:
+    container_name: server_bike
+    image: bike_server
+    depends_on:
+      - mysql_bike
+      - db_bike
+    environment:
+      MYSQL_ROOT_PASSWORD: 1234
+      MYSQL_DATABASE: db_bike
+      MYSQL_USER: root
+      MYSQL_PASSWORD: 1234
+    ports:
+      - "5000:5000"
+    networks:
+      - bike_network
+
+volumes:
+  mysql_data:
+
+networks:
+  bike_network:
